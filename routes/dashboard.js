@@ -34,12 +34,14 @@ router.get("/watchlist", async (req, res) => {
 
     res.render("pages/watchlist", {
       title: "Watchlist",
+      page: "watchlist",
       watchlist,
     })
   } catch (error) {
     console.error("Error loading watchlist:", error)
     res.render("pages/watchlist", {
       title: "Watchlist",
+      page: "watchlist",
       watchlist: [],
     })
   }
@@ -53,6 +55,7 @@ router.get("/analytics", async (req, res) => {
 
     res.render("pages/analytics", {
       title: "Analytics",
+      page: "analytics",
       sectors,
       marketSummary,
     })
@@ -60,6 +63,7 @@ router.get("/analytics", async (req, res) => {
     console.error("Error loading analytics:", error)
     res.render("pages/analytics", {
       title: "Analytics",
+      page: "analytics",
       sectors: [],
       marketSummary: null,
     })

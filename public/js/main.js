@@ -1,6 +1,4 @@
-import { Chart } from "@/components/ui/chart"
 // EquiTrack Main JavaScript
-import bootstrap from "bootstrap"
 
 class EquiTrack {
   constructor() {
@@ -95,9 +93,12 @@ class EquiTrack {
 
   async loadCompanies() {
     try {
+      console.log("Loading companies...")
       this.showLoading("companiesList", true)
       const response = await fetch("/api/companies")
+      console.log("API response:", response)
       const result = await response.json()
+      console.log("API result:", result)
 
       if (result.success) {
         this.renderCompanies(result.data)
@@ -271,13 +272,15 @@ class EquiTrack {
     }
 
     // Prepare data based on chart type
-    const chartData = this.prepareChartData(historicalData, stockData)
-    const chartConfig = this.getChartConfig(chartData, stockData)
+    this.chartData = this.prepareChartData(historicalData, stockData)
+    const chartConfig = this.getChartConfig(this.chartData, stockData)
 
-    this.chart = new Chart(ctx, chartConfig)
-
-    // Add chart interaction handlers
-    this.addChartInteractions()
+    // Small delay to ensure container is properly rendered
+    setTimeout(() => {
+      this.chart = new Chart(ctx, chartConfig)
+      // Add chart interaction handlers
+      this.addChartInteractions()
+    }, 100)
   }
 
   prepareChartData(historicalData, stockData) {
@@ -357,8 +360,9 @@ class EquiTrack {
 
     // Add candlestick specific configuration
     if (this.chartType === "candlestick") {
-      baseConfig.type = "candlestick"
-      baseConfig.data.datasets = this.getCandlestickDataset(chartData, stockData)
+      // Fallback to line chart since candlestick is not available in standard Chart.js
+      baseConfig.type = "line"
+      console.warn("Candlestick charts not available, falling back to line chart")
     }
 
     return baseConfig
@@ -483,7 +487,7 @@ class EquiTrack {
           color: textColor,
           callback: (value) => this.formatVolume(value),
         },
-        max: Math.max(...(this.chart?.data?.datasets?.find((d) => d.label === "Volume")?.data || [0])) * 4,
+        max: Math.max(...(this.chartData?.volumes || [0])) * 4,
       }
     }
 
@@ -609,6 +613,13 @@ class EquiTrack {
       })
 
       const result = await response.json()
+      
+      // Check if it's already in watchlist - treat as success
+      if (result.message && result.message.includes("already in watchlist")) {
+        this.showToast("Company is already in your watchlist", "info")
+        return
+      }
+      
       if (result.success) {
         this.showToast("Added to watchlist", "success")
       } else {
@@ -736,7 +747,7 @@ class EquiTrack {
     toastContainer.appendChild(toast)
 
     // Show toast
-    const bsToast = new bootstrap.Toast(toast)
+    const bsToast = new window.bootstrap.Toast(toast)
     bsToast.show()
 
     // Remove from DOM after hiding
@@ -770,7 +781,13 @@ class EquiTrack {
 
 // Initialize EquiTrack when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  window.equiTrack = new EquiTrack()
+  console.log("DOM loaded, initializing EquiTrack...")
+  try {
+    window.equiTrack = new EquiTrack()
+    console.log("EquiTrack initialized successfully")
+  } catch (error) {
+    console.error("Error initializing EquiTrack:", error)
+  }
 
   // Handle URL parameters
   const urlParams = new URLSearchParams(window.location.search)

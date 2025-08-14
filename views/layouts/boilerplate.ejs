@@ -31,5 +31,13 @@
     
     <!-- Custom JS -->
     <script src="/js/main.js"></script>
+    
+    <!-- Page-specific JS -->
+    <% if (typeof page !== 'undefined' && page === 'watchlist') { %>
+        <script src="/js/watchlist.js"></script>
+    <% } %>
+    <% if (typeof page !== 'undefined' && page === 'analytics') { %>
+        <script src="/js/analytics.js"></script>
+    <% } %>
 </body>
 </html>

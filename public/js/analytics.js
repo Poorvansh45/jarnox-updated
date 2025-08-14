@@ -1,4 +1,3 @@
-import { Chart } from "@/components/ui/chart"
 // Analytics page specific JavaScript
 class AnalyticsPage {
   constructor() {

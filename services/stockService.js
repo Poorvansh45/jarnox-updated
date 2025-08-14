@@ -626,12 +626,12 @@ class StockService {
           COALESCE(csd.change_amount, 0) as change_amount,
           COALESCE(csd.change_percentage, 0) as change,
           COALESCE(csd.volume, 0) as volume,
-          w.added_date
+          w.added_at as added_date
         FROM watchlist w
         JOIN companies c ON w.company_id = c.id
         LEFT JOIN current_stock_data csd ON c.id = csd.company_id
         WHERE w.user_id = ?
-        ORDER BY w.added_date DESC
+        ORDER BY w.added_at DESC
       `
       const result = await database.query(query, [userId])
       this.setCache(cacheKey, result)
@@ -642,33 +642,59 @@ class StockService {
     }
   }
 
-  async addToWatchlist(companyId, userId = 1) {
+  async addToWatchlist(symbol, userId = 1) {
     try {
+      // First get company ID by symbol
+      const companyQuery = "SELECT id FROM companies WHERE UPPER(symbol) = UPPER(?)"
+      const companyResult = await database.query(companyQuery, [symbol])
+      
+      if (companyResult.length === 0) {
+        throw new Error(`Company with symbol ${symbol} not found`)
+      }
+      
+      const companyId = companyResult[0].id
+
       // Check if already in watchlist
       const existingQuery = "SELECT id FROM watchlist WHERE company_id = ? AND user_id = ?"
       const existing = await database.query(existingQuery, [companyId, userId])
 
       if (existing.length > 0) {
-        throw new Error("Company already in watchlist")
+        return { 
+          success: true, 
+          message: "Company already in watchlist",
+          alreadyExists: true,
+          company_id: companyId, 
+          user_id: userId 
+        }
       }
 
-      const query = "INSERT INTO watchlist (company_id, user_id, added_date) VALUES (?, ?, ?)"
+      const query = "INSERT INTO watchlist (company_id, user_id, added_at) VALUES (?, ?, ?)"
       const result = await database.query(query, [companyId, userId, new Date().toISOString()])
 
       // Clear watchlist cache
       this.cache.delete(this.getCacheKey("getWatchlist", [userId]))
 
-      return { id: result.insertId, company_id: companyId, user_id: userId }
+      return { id: result.insertId, company_id: companyId, user_id: userId, message: "Added to watchlist successfully" }
     } catch (error) {
       console.error("Error adding to watchlist:", error)
       throw error
     }
   }
 
-  async removeFromWatchlist(watchlistId, userId = 1) {
+  async removeFromWatchlist(symbol, userId = 1) {
     try {
-      const query = "DELETE FROM watchlist WHERE id = ? AND user_id = ?"
-      const result = await database.query(query, [watchlistId, userId])
+      // First get company ID by symbol
+      const companyQuery = "SELECT id FROM companies WHERE UPPER(symbol) = UPPER(?)"
+      const companyResult = await database.query(companyQuery, [symbol])
+      
+      if (companyResult.length === 0) {
+        throw new Error(`Company with symbol ${symbol} not found`)
+      }
+      
+      const companyId = companyResult[0].id
+
+      const query = "DELETE FROM watchlist WHERE company_id = ? AND user_id = ?"
+      const result = await database.query(query, [companyId, userId])
 
       if (result.affectedRows === 0) {
         throw new Error("Watchlist item not found or access denied")
@@ -677,7 +703,7 @@ class StockService {
       // Clear watchlist cache
       this.cache.delete(this.getCacheKey("getWatchlist", [userId]))
 
-      return { success: true }
+      return { success: true, message: "Removed from watchlist successfully" }
     } catch (error) {
       console.error("Error removing from watchlist:", error)
       throw error
