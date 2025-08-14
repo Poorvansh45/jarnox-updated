@@ -1,0 +1,127 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Market Analytics</h2>
+        </div>
+    </div>
+
+    <!-- Market Summary Cards -->
+    <% if (marketSummary) { %>
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0"><%= marketSummary.total_companies %></h3>
+                        <small>Total Companies</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0"><%= marketSummary.gainers %></h3>
+                        <small>Gainers</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0"><%= marketSummary.losers %></h3>
+                        <small>Losers</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-secondary text-white">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0"><%= parseFloat(marketSummary.avg_change).toFixed(2) %>%</h3>
+                        <small>Avg Change</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <div class="row">
+        <!-- Sector Performance -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Sector Performance</h5>
+                </div>
+                <div class="card-body">
+                    <% if (sectors && sectors.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Sector</th>
+                                        <th>Companies</th>
+                                        <th>Avg Change</th>
+                                        <th>Avg Price</th>
+                                        <th>Volume</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% sectors.forEach(sector => { %>
+                                        <tr>
+                                            <td><strong><%= sector.sector %></strong></td>
+                                            <td><%= sector.company_count %></td>
+                                            <td>
+                                                <span class="<%= (sector.avg_change >= 0) ? 'text-success' : 'text-danger' %>">
+                                                    <%= (sector.avg_change >= 0) ? '+' : '' %><%= parseFloat(sector.avg_change).toFixed(2) %>%
+                                                </span>
+                                            </td>
+                                            <td>₹<%= parseFloat(sector.avg_price).toFixed(2) %></td>
+                                            <td><%= parseInt(sector.total_volume).toLocaleString() %></td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted text-center py-4">No sector data available</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Heatmap -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Market Heatmap</h5>
+                </div>
+                <div class="card-body">
+                    <div id="marketHeatmap" style="height: 300px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Loading heatmap...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Volume Analysis -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Volume Analysis</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="volumeChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

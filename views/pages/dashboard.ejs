@@ -1,0 +1,196 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container-fluid">
+    <!-- Market Summary Row -->
+    <% if (marketSummary) { %>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-gradient-primary text-white">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="mb-2">Market Overview</h4>
+                                <div class="row">
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-center">
+                                            <h5 class="mb-0"><%= marketSummary.total_companies %></h5>
+                                            <small>Companies</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-center">
+                                            <h5 class="mb-0 text-success"><%= marketSummary.gainers %></h5>
+                                            <small>Gainers</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-center">
+                                            <h5 class="mb-0 text-danger"><%= marketSummary.losers %></h5>
+                                            <small>Losers</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-center">
+                                            <h5 class="mb-0"><%= parseFloat(marketSummary.avg_change).toFixed(2) %>%</h5>
+                                            <small>Avg Change</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <span class="badge bg-success fs-6">Market Open</span>
+                                    <small class="opacity-75">Last updated: <%= new Date().toLocaleTimeString() %></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <div class="row">
+        <!-- Sidebar with company list -->
+        <div class="col-md-3 sidebar p-0">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Companies</h5>
+                        <button class="btn btn-sm btn-outline-primary" id="refreshCompanies">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <div class="mt-3">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="companySearch" 
+                                   placeholder="Search companies...">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-0">
+                    <div class="company-list" id="companiesList">
+                        <!-- Companies will be loaded dynamically -->
+                        <div class="text-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2 text-muted small">Loading companies...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content area -->
+        <div class="col-md-9 p-4">
+            <!-- Top Movers Row -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="bi bi-arrow-up-circle"></i> Top Gainers</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <% if (topGainers && topGainers.length > 0) { %>
+                                <% topGainers.forEach(stock => { %>
+                                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                                        <div>
+                                            <strong><%= stock.symbol %></strong>
+                                            <div class="small text-muted"><%= stock.name %></div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div>₹<%= stock.price %></div>
+                                            <small class="text-success">+<%= stock.change %>%</small>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="p-3 text-center text-muted">No data available</div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0"><i class="bi bi-arrow-down-circle"></i> Top Losers</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <% if (topLosers && topLosers.length > 0) { %>
+                                <% topLosers.forEach(stock => { %>
+                                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                                        <div>
+                                            <strong><%= stock.symbol %></strong>
+                                            <div class="small text-muted"><%= stock.name %></div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div>₹<%= stock.price %></div>
+                                            <small class="text-danger"><%= stock.change %>%</small>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="p-3 text-center text-muted">No data available</div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock info section -->
+            <div id="stockInfo" class="mb-4">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-graph-up display-1 text-muted"></i>
+                        <h4 class="text-muted mt-3">Select a company to view stock data</h4>
+                        <p class="text-muted">Choose from the list on the left to see detailed stock information and charts.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart section -->
+            <div class="card chart-container">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Stock Price Chart</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="btn-group btn-group-sm" role="group" id="periodButtons">
+                                <input type="radio" class="btn-check" name="period" id="period1W" value="1W">
+                                <label class="btn btn-outline-primary" for="period1W">1W</label>
+                                
+                                <input type="radio" class="btn-check" name="period" id="period1M" value="1M" checked>
+                                <label class="btn btn-outline-primary" for="period1M">1M</label>
+                                
+                                <input type="radio" class="btn-check" name="period" id="period3M" value="3M">
+                                <label class="btn btn-outline-primary" for="period3M">3M</label>
+                                
+                                <input type="radio" class="btn-check" name="period" id="period6M" value="6M">
+                                <label class="btn btn-outline-primary" for="period6M">6M</label>
+                                
+                                <input type="radio" class="btn-check" name="period" id="period1Y" value="1Y">
+                                <label class="btn btn-outline-primary" for="period1Y">1Y</label>
+                            </div>
+                            <div class="loading-spinner">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

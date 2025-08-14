@@ -1,0 +1,57 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+            <i class="bi bi-graph-up-arrow text-primary me-2"></i>
+            <span class="text-primary">EquiTrack</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link <%= (title === 'Dashboard') ? 'active' : '' %>" href="/">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= (title === 'Watchlist') ? 'active' : '' %>" href="/watchlist">
+                        <i class="bi bi-bookmark"></i> Watchlist
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <%= (title === 'Analytics') ? 'active' : '' %>" href="/analytics">
+                        <i class="bi bi-bar-chart"></i> Analytics
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="d-flex align-items-center gap-3">
+                <!-- Market Status -->
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-success me-2">
+                        <i class="bi bi-circle-fill"></i> Market Open
+                    </span>
+                    <small class="text-muted d-none d-md-block">
+                        NSE: 9:15 AM - 3:30 PM
+                    </small>
+                </div>
+                
+                <!-- Search -->
+                <div class="position-relative d-none d-lg-block">
+                    <input type="text" class="form-control form-control-sm" 
+                           id="globalSearch" placeholder="Search stocks..." style="width: 200px;">
+                    <div id="globalSearchResults" class="position-absolute bg-white border rounded shadow-sm mt-1 w-100" 
+                         style="z-index: 1000; display: none;"></div>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button class="btn btn-outline-secondary btn-sm" id="themeToggle" title="Toggle theme">
+                    <i class="bi bi-sun"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,80 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0">Add New Company</h4>
+        </div>
+        <div class="card-body">
+          <% if (typeof error !== 'undefined') { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+
+          <form method="POST" action="/admin/companies">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="symbol" class="form-label">Stock Symbol *</label>
+                  <input type="text" class="form-control" id="symbol" name="symbol" 
+                         value="<%= typeof formData !== 'undefined' ? formData.symbol : '' %>" 
+                         placeholder="e.g., RELIANCE" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="sector" class="form-label">Sector *</label>
+                  <select class="form-select" id="sector" name="sector" required>
+                    <option value="">Select Sector</option>
+                    <option value="Technology" <%= typeof formData !== 'undefined' && formData.sector === 'Technology' ? 'selected' : '' %>>Technology</option>
+                    <option value="Banking" <%= typeof formData !== 'undefined' && formData.sector === 'Banking' ? 'selected' : '' %>>Banking</option>
+                    <option value="Energy" <%= typeof formData !== 'undefined' && formData.sector === 'Energy' ? 'selected' : '' %>>Energy</option>
+                    <option value="Automotive" <%= typeof formData !== 'undefined' && formData.sector === 'Automotive' ? 'selected' : '' %>>Automotive</option>
+                    <option value="Pharmaceuticals" <%= typeof formData !== 'undefined' && formData.sector === 'Pharmaceuticals' ? 'selected' : '' %>>Pharmaceuticals</option>
+                    <option value="FMCG" <%= typeof formData !== 'undefined' && formData.sector === 'FMCG' ? 'selected' : '' %>>FMCG</option>
+                    <option value="Telecommunications" <%= typeof formData !== 'undefined' && formData.sector === 'Telecommunications' ? 'selected' : '' %>>Telecommunications</option>
+                    <option value="Steel" <%= typeof formData !== 'undefined' && formData.sector === 'Steel' ? 'selected' : '' %>>Steel</option>
+                    <option value="Cement" <%= typeof formData !== 'undefined' && formData.sector === 'Cement' ? 'selected' : '' %>>Cement</option>
+                    <option value="Mining" <%= typeof formData !== 'undefined' && formData.sector === 'Mining' ? 'selected' : '' %>>Mining</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="name" class="form-label">Company Name *</label>
+              <input type="text" class="form-control" id="name" name="name" 
+                     value="<%= typeof formData !== 'undefined' ? formData.name : '' %>" 
+                     placeholder="e.g., Reliance Industries Limited" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="market_cap" class="form-label">Market Cap (in Billions)</label>
+              <input type="number" step="0.01" class="form-control" id="market_cap" name="market_cap" 
+                     value="<%= typeof formData !== 'undefined' ? formData.market_cap : '' %>" 
+                     placeholder="e.g., 1500.50">
+            </div>
+
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description" name="description" rows="3" 
+                        placeholder="Brief description of the company"><%= typeof formData !== 'undefined' ? formData.description : '' %></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a href="/admin" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+              </a>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Add Company
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
