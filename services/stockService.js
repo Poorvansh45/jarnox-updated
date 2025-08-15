@@ -212,16 +212,16 @@ class StockService {
       const query = `
         SELECT 
           COUNT(*) as total_companies,
-          ROUND(AVG(COALESCE(change_percentage, 0)), 2) as avg_change,
-          SUM(CASE WHEN COALESCE(change_percentage, 0) > 0 THEN 1 ELSE 0 END) as gainers,
-          SUM(CASE WHEN COALESCE(change_percentage, 0) < 0 THEN 1 ELSE 0 END) as losers,
-          SUM(CASE WHEN COALESCE(change_percentage, 0) = 0 THEN 1 ELSE 0 END) as unchanged,
-          MAX(COALESCE(change_percentage, 0)) as max_gain,
-          MIN(COALESCE(change_percentage, 0)) as max_loss,
-          SUM(COALESCE(volume, 0)) as total_volume,
-          AVG(COALESCE(current_price, 0)) as avg_price
-        FROM current_stock_data csd
-        RIGHT JOIN companies c ON csd.company_id = c.id
+          ROUND(AVG(COALESCE(csd.change_percentage, 0)), 2) as avg_change,
+          SUM(CASE WHEN COALESCE(csd.change_percentage, 0) > 0 THEN 1 ELSE 0 END) as gainers,
+          SUM(CASE WHEN COALESCE(csd.change_percentage, 0) < 0 THEN 1 ELSE 0 END) as losers,
+          SUM(CASE WHEN COALESCE(csd.change_percentage, 0) = 0 THEN 1 ELSE 0 END) as unchanged,
+          MAX(COALESCE(csd.change_percentage, 0)) as max_gain,
+          MIN(COALESCE(csd.change_percentage, 0)) as max_loss,
+          SUM(COALESCE(csd.volume, 0)) as total_volume,
+          AVG(COALESCE(csd.current_price, 0)) as avg_price
+        FROM companies c
+        LEFT JOIN current_stock_data csd ON c.id = csd.company_id
       `
       const result = await database.query(query)
       const summary = {
@@ -258,8 +258,8 @@ class StockService {
           COALESCE(csd.low_52w, 0) as low_52w
         FROM companies c
         LEFT JOIN current_stock_data csd ON c.id = csd.company_id
-        WHERE COALESCE(csd.change_percentage, 0) > 0
-        ORDER BY COALESCE(csd.change_percentage, 0) DESC
+        WHERE COALESCE(csd.current_price, 0) > 0
+        ORDER BY COALESCE(csd.current_price, 0) DESC
         LIMIT ?
       `
       const result = await database.query(query, [limit])
@@ -290,8 +290,8 @@ class StockService {
           COALESCE(csd.low_52w, 0) as low_52w
         FROM companies c
         LEFT JOIN current_stock_data csd ON c.id = csd.company_id
-        WHERE COALESCE(csd.change_percentage, 0) < 0
-        ORDER BY COALESCE(csd.change_percentage, 0) ASC
+        WHERE COALESCE(csd.current_price, 0) > 0
+        ORDER BY COALESCE(csd.current_price, 0) ASC
         LIMIT ?
       `
       const result = await database.query(query, [limit])
@@ -605,6 +605,36 @@ class StockService {
       return result[0]
     } catch (error) {
       console.error("Error fetching company by ID:", error)
+      throw error
+    }
+  }
+
+  async getCompanyDetails(symbol) {
+    try {
+      const query = `
+        SELECT 
+          c.id,
+          c.symbol,
+          c.name,
+          c.sector,
+          c.market_cap,
+          c.description,
+          COALESCE(csd.current_price, 0) as current_price,
+          COALESCE(csd.change_percentage, 0) as change_percentage,
+          COALESCE(csd.volume, 0) as volume
+        FROM companies c
+        LEFT JOIN current_stock_data csd ON c.id = csd.company_id
+        WHERE UPPER(c.symbol) = UPPER(?)
+      `
+      const result = await database.query(query, [symbol])
+
+      if (result.length === 0) {
+        throw new Error(`Company with symbol ${symbol} not found`)
+      }
+
+      return result[0]
+    } catch (error) {
+      console.error("Error fetching company details:", error)
       throw error
     }
   }

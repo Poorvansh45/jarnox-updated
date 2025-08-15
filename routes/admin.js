@@ -9,11 +9,23 @@ router.get("/", async (req, res) => {
     const totalCompanies = companies.length
     const marketSummary = await stockService.getMarketSummary()
 
+    // Calculate additional market summary data
+    const totalMarketCap = companies.reduce((sum, company) => sum + (company.market_cap || 0), 0)
+    const totalVolume = marketSummary ? marketSummary.total_volume : 0
+    const avgChange = marketSummary ? marketSummary.avg_change : 0
+
     res.render("pages/admin", {
       title: "Admin Dashboard",
       companies,
       totalCompanies,
-      marketSummary,
+      marketSummary: {
+        ...marketSummary,
+        totalMarketCap: totalMarketCap / 1000000000000, // Convert to trillion
+        totalVolume: totalVolume / 1000000000, // Convert to billion
+        avgChange: avgChange
+      },
+      success: req.query.success,
+      error: req.query.error
     })
   } catch (error) {
     console.error("Error loading admin dashboard:", error)

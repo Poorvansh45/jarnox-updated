@@ -632,6 +632,13 @@ class EquiTrack {
   }
 
   async removeFromWatchlist(symbol) {
+    // Prevent double confirmation by checking if already processing
+    if (this.isRemoving) return
+    
+    if (!confirm(`Remove ${symbol} from watchlist?`)) return
+
+    this.isRemoving = true
+
     try {
       const response = await fetch(`/api/watchlist/${symbol}`, {
         method: "DELETE",
@@ -650,6 +657,8 @@ class EquiTrack {
     } catch (error) {
       console.error("Error removing from watchlist:", error)
       this.showToast("Failed to remove from watchlist", "error")
+    } finally {
+      this.isRemoving = false
     }
   }
 
